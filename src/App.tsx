@@ -1833,26 +1833,23 @@ export default function App() {
                       <div className="space-y-4">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Typography Hierarchy</h4>
                         <div className="space-y-6 bg-neutral-50 p-6 rounded-2xl border border-black/5">
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">H1</p>
-                            <h1 className="text-4xl font-extrabold text-neutral-900" style={{ fontFamily: brand.typography.headerFont }}>{brand.brandGuidelines.typographyHierarchy.h1}</h1>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">H2</p>
-                            <h2 className="text-3xl font-bold text-neutral-800" style={{ fontFamily: brand.typography.headerFont }}>{brand.brandGuidelines.typographyHierarchy.h2}</h2>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">H3</p>
-                            <h3 className="text-2xl font-semibold text-neutral-800" style={{ fontFamily: brand.typography.headerFont }}>{brand.brandGuidelines.typographyHierarchy.h3}</h3>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Body</p>
-                            <p className="text-base font-normal text-neutral-700 leading-relaxed" style={{ fontFamily: brand.typography.bodyFont }}>{brand.brandGuidelines.typographyHierarchy.body}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Caption</p>
-                            <p className="text-xs font-light text-neutral-500" style={{ fontFamily: brand.typography.bodyFont }}>{brand.brandGuidelines.typographyHierarchy.caption}</p>
-                          </div>
+                          {(['h1', 'h2', 'h3', 'body', 'caption'] as const).map((level) => (
+                            <div key={level} className="space-y-1">
+                              <div className="flex justify-between items-baseline">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">{level.toUpperCase()}</p>
+                                <p className="text-[9px] font-mono text-neutral-500">{brand.brandGuidelines.typographyHierarchy[level].style}</p>
+                              </div>
+                              <p className="text-xs text-neutral-500 italic mb-1">{brand.brandGuidelines.typographyHierarchy[level].usage}</p>
+                              <div className={cn(
+                                level === 'h1' ? "text-4xl font-extrabold" :
+                                level === 'h2' ? "text-3xl font-bold" :
+                                level === 'h3' ? "text-2xl font-semibold" :
+                                level === 'body' ? "text-base font-normal" : "text-xs font-light"
+                              )} style={{ fontFamily: ['h1', 'h2', 'h3'].includes(level) ? brand.typography.headerFont : brand.typography.bodyFont }}>
+                                {level === 'h1' ? 'Heading 1' : level === 'h2' ? 'Heading 2' : level === 'h3' ? 'Heading 3' : level === 'body' ? 'Body text example' : 'Caption text example'}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
 

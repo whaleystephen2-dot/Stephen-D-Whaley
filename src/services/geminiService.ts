@@ -108,11 +108,11 @@ export interface BrandIdentity {
       accent: string[];
     };
     typographyHierarchy: {
-      h1: string;
-      h2: string;
-      h3: string;
-      body: string;
-      caption: string;
+      h1: { usage: string; style: string };
+      h2: { usage: string; style: string };
+      h3: { usage: string; style: string };
+      body: { usage: string; style: string };
+      caption: { usage: string; style: string };
     };
     brandMarkApplications: {
       acceptable: string[];
@@ -146,7 +146,7 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
     Also provide 3-5 adaptable visual template concepts for social media posts (e.g., Instagram, Twitter). Describe how they incorporate the brand identity, and include placeholder text and image suggestions relevant to a general business context.
     Also generate a mood board or visual theme based on the brand identity. Include a description of the visual theme, the imagery style, a list of suggested textures/patterns, and 4 detailed image prompts that could be used to generate mood board images.
     Also provide imagery style suggestions based on the mission and color palette. Suggest a style for brand photography (e.g., candid, professional, minimalist) and illustration (e.g., flat design, hand-drawn, abstract). Provide 2-3 example image descriptions or mood board concepts for each.
-    Also outline detailed brand guidelines, including logo usage rules (clear space, minimum size, placement, and specific examples of acceptable and unacceptable mockups for digital and print applications, referencing the primary, monochromatic, and reversed logo versions), color palette variations (primary, secondary, accent), typography hierarchy examples (h1, h2, h3, body, caption), acceptable/unacceptable brand mark applications, social media icon style (color usage, size constraints, acceptable variations, and guidance on usage), and a dedicated section for logo version guidelines (detailing acceptable and unacceptable uses for the primary, monochromatic, and reversed versions in digital and print contexts).
+    Also outline detailed brand guidelines, including logo usage rules (clear space, minimum size, placement, and specific examples of acceptable and unacceptable mockups for digital and print applications, referencing the primary, monochromatic, and reversed logo versions), color palette variations (primary, secondary, accent), a detailed typography hierarchy (for h1, h2, h3, body, and caption, including usage context and styling rules like font size, weight, and case), acceptable/unacceptable brand mark applications, social media icon style (color usage, size constraints, acceptable variations, and guidance on usage), and a dedicated section for logo version guidelines (detailing acceptable and unacceptable uses for the primary, monochromatic, and reversed versions in digital and print contexts).
     Also provide highly detailed prompts for generating a primary logo, a monochromatic version, a reversed version, an icon-only version, a horizontal version, and a vertical version. The primary logo MUST be in a ${logoStyle} style.
     Furthermore, generate 3 variations of secondary marks or simplified logos specifically optimized for social media profile pictures (Twitter, Facebook, Instagram), ensuring they are legible at small sizes and fit common circular/square aspect ratios.
     Also, design a professional business card mockup. Provide a detailed description for the front and back of the card, specifying the placement of the logo, company name, tagline, contact information placeholders (Name, Title, Email, Phone, Website), and the company mission statement. Explain the layout rationale.
@@ -399,11 +399,46 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
               typographyHierarchy: {
                 type: Type.OBJECT,
                 properties: {
-                  h1: { type: Type.STRING, description: "H1 styling rules (e.g., 'Bold, 48px, Uppercase')." },
-                  h2: { type: Type.STRING, description: "H2 styling rules." },
-                  h3: { type: Type.STRING, description: "H3 styling rules." },
-                  body: { type: Type.STRING, description: "Body text styling rules." },
-                  caption: { type: Type.STRING, description: "Caption text styling rules." }
+                  h1: { 
+                    type: Type.OBJECT, 
+                    properties: { 
+                      usage: { type: Type.STRING, description: "Usage context for H1." },
+                      style: { type: Type.STRING, description: "Styling rules (e.g., 'Bold, 48px, Uppercase')." }
+                    },
+                    required: ["usage", "style"]
+                  },
+                  h2: { 
+                    type: Type.OBJECT, 
+                    properties: { 
+                      usage: { type: Type.STRING, description: "Usage context for H2." },
+                      style: { type: Type.STRING, description: "Styling rules." }
+                    },
+                    required: ["usage", "style"]
+                  },
+                  h3: { 
+                    type: Type.OBJECT, 
+                    properties: { 
+                      usage: { type: Type.STRING, description: "Usage context for H3." },
+                      style: { type: Type.STRING, description: "Styling rules." }
+                    },
+                    required: ["usage", "style"]
+                  },
+                  body: { 
+                    type: Type.OBJECT, 
+                    properties: { 
+                      usage: { type: Type.STRING, description: "Usage context for body text." },
+                      style: { type: Type.STRING, description: "Styling rules." }
+                    },
+                    required: ["usage", "style"]
+                  },
+                  caption: { 
+                    type: Type.OBJECT, 
+                    properties: { 
+                      usage: { type: Type.STRING, description: "Usage context for captions." },
+                      style: { type: Type.STRING, description: "Styling rules." }
+                    },
+                    required: ["usage", "style"]
+                  }
                 },
                 required: ["h1", "h2", "h3", "body", "caption"]
               },
