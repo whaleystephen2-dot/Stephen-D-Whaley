@@ -57,6 +57,12 @@ export interface BrandIdentity {
     prompt: string;
     description: string;
   }[];
+  profileImagePrompts: string[];
+  businessCardDesign: {
+    front: string;
+    back: string;
+    layoutRationale: string;
+  };
   slogans: {
     slogan: string;
     rationale: string;
@@ -87,6 +93,14 @@ export interface BrandIdentity {
       clearSpace: string;
       minimumSize: string;
       placement: string;
+      digitalMockups: {
+        acceptable: string[];
+        unacceptable: string[];
+      };
+      printMockups: {
+        acceptable: string[];
+        unacceptable: string[];
+      };
     };
     colorPaletteVariations: {
       primary: string[];
@@ -110,6 +124,11 @@ export interface BrandIdentity {
       acceptableVariations: string[];
       guidance: string;
     };
+    logoVersionGuidelines: {
+      primary: { acceptable: string[]; unacceptable: string[] };
+      monochromatic: { acceptable: string[]; unacceptable: string[] };
+      reversed: { acceptable: string[]; unacceptable: string[] };
+    };
   };
 }
 
@@ -127,8 +146,10 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
     Also provide 3-5 adaptable visual template concepts for social media posts (e.g., Instagram, Twitter). Describe how they incorporate the brand identity, and include placeholder text and image suggestions relevant to a general business context.
     Also generate a mood board or visual theme based on the brand identity. Include a description of the visual theme, the imagery style, a list of suggested textures/patterns, and 4 detailed image prompts that could be used to generate mood board images.
     Also provide imagery style suggestions based on the mission and color palette. Suggest a style for brand photography (e.g., candid, professional, minimalist) and illustration (e.g., flat design, hand-drawn, abstract). Provide 2-3 example image descriptions or mood board concepts for each.
-    Also outline detailed brand guidelines, including logo usage rules (clear space, minimum size, placement), color palette variations (primary, secondary, accent), typography hierarchy examples (h1, h2, h3, body, caption), acceptable/unacceptable brand mark applications, and social media icon style (color usage, size constraints, acceptable variations, and guidance on usage).
+    Also outline detailed brand guidelines, including logo usage rules (clear space, minimum size, placement, and specific examples of acceptable and unacceptable mockups for digital and print applications, referencing the primary, monochromatic, and reversed logo versions), color palette variations (primary, secondary, accent), typography hierarchy examples (h1, h2, h3, body, caption), acceptable/unacceptable brand mark applications, social media icon style (color usage, size constraints, acceptable variations, and guidance on usage), and a dedicated section for logo version guidelines (detailing acceptable and unacceptable uses for the primary, monochromatic, and reversed versions in digital and print contexts).
     Also provide highly detailed prompts for generating a primary logo, a monochromatic version, a reversed version, an icon-only version, a horizontal version, and a vertical version. The primary logo MUST be in a ${logoStyle} style.
+    Furthermore, generate 3 variations of secondary marks or simplified logos specifically optimized for social media profile pictures (Twitter, Facebook, Instagram), ensuring they are legible at small sizes and fit common circular/square aspect ratios.
+    Also, design a professional business card mockup. Provide a detailed description for the front and back of the card, specifying the placement of the logo, company name, tagline, contact information placeholders (Name, Title, Email, Phone, Website), and the company mission statement. Explain the layout rationale.
     Finally, suggest a set of 3-5 simple, abstract icons suitable for social media profile pictures or favicons. These icons should be inspired by the generated logo and color palette. Provide a detailed image generation prompt and a brief description for each icon.`,
     config: {
       responseMimeType: "application/json",
@@ -263,6 +284,20 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
             },
             description: "3-5 simple, abstract icons suitable for social media profile pictures or favicons."
           },
+          profileImagePrompts: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "3 detailed prompts for social media profile pictures, optimized for legibility at small sizes."
+          },
+          businessCardDesign: {
+            type: Type.OBJECT,
+            properties: {
+              front: { type: Type.STRING, description: "Description of the business card front layout." },
+              back: { type: Type.STRING, description: "Description of the business card back layout." },
+              layoutRationale: { type: Type.STRING, description: "Explanation of the design choices for the business card." }
+            },
+            required: ["front", "back", "layoutRationale"]
+          },
           socialMediaTemplates: {
             type: Type.ARRAY,
             description: "3-5 adaptable social media post templates (e.g., Instagram, Twitter).",
@@ -332,9 +367,25 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
                 properties: {
                   clearSpace: { type: Type.STRING, description: "Rules for clear space around the logo." },
                   minimumSize: { type: Type.STRING, description: "Minimum size requirements for the logo." },
-                  placement: { type: Type.STRING, description: "Guidelines for logo placement." }
+                  placement: { type: Type.STRING, description: "Guidelines for logo placement." },
+                  digitalMockups: {
+                    type: Type.OBJECT,
+                    properties: {
+                      acceptable: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Examples of acceptable digital mockups (e.g., website header, app icon) referencing primary/monochromatic/reversed versions." },
+                      unacceptable: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Examples of unacceptable digital mockups." }
+                    },
+                    required: ["acceptable", "unacceptable"]
+                  },
+                  printMockups: {
+                    type: Type.OBJECT,
+                    properties: {
+                      acceptable: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Examples of acceptable print mockups (e.g., business cards, billboards) referencing primary/monochromatic/reversed versions." },
+                      unacceptable: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Examples of unacceptable print mockups." }
+                    },
+                    required: ["acceptable", "unacceptable"]
+                  }
                 },
-                required: ["clearSpace", "minimumSize", "placement"]
+                required: ["clearSpace", "minimumSize", "placement", "digitalMockups", "printMockups"]
               },
               colorPaletteVariations: {
                 type: Type.OBJECT,
@@ -373,12 +424,42 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
                   guidance: { type: Type.STRING, description: "Guidance on how these icons should be used (e.g., as profile pictures, favicons)." }
                 },
                 required: ["colorUsage", "sizeConstraints", "acceptableVariations", "guidance"]
+              },
+              logoVersionGuidelines: {
+                type: Type.OBJECT,
+                properties: {
+                  primary: {
+                    type: Type.OBJECT,
+                    properties: {
+                      acceptable: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      unacceptable: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    },
+                    required: ["acceptable", "unacceptable"]
+                  },
+                  monochromatic: {
+                    type: Type.OBJECT,
+                    properties: {
+                      acceptable: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      unacceptable: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    },
+                    required: ["acceptable", "unacceptable"]
+                  },
+                  reversed: {
+                    type: Type.OBJECT,
+                    properties: {
+                      acceptable: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      unacceptable: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    },
+                    required: ["acceptable", "unacceptable"]
+                  }
+                },
+                required: ["primary", "monochromatic", "reversed"]
               }
             },
-            required: ["logoUsage", "colorPaletteVariations", "typographyHierarchy", "brandMarkApplications", "socialMediaIconStyle"]
+            required: ["logoUsage", "colorPaletteVariations", "typographyHierarchy", "brandMarkApplications", "socialMediaIconStyle", "logoVersionGuidelines"]
           }
         },
-        required: ["name", "mission", "tagline", "personality", "colors", "typography", "logoPrompt", "monochromaticLogoPrompt", "reversedLogoPrompt", "iconOnlyLogoPrompt", "secondaryMarkPrompts", "abstractIcons", "socialMediaTemplates", "brandVoice", "slogans", "marketingCopy", "moodBoard", "brandGuidelines"]
+        required: ["name", "mission", "tagline", "personality", "colors", "typography", "logoPrompt", "monochromaticLogoPrompt", "reversedLogoPrompt", "iconOnlyLogoPrompt", "secondaryMarkPrompts", "abstractIcons", "profileImagePrompts", "businessCardDesign", "socialMediaTemplates", "brandVoice", "slogans", "marketingCopy", "moodBoard", "brandGuidelines"]
       }
     }
   });

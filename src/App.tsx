@@ -20,7 +20,9 @@ import {
   Info,
   LayoutTemplate,
   Volume2,
-  BookOpen
+  BookOpen,
+  User,
+  CreditCard
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -224,6 +226,7 @@ export default function App() {
   const [customLogoPrompt, setCustomLogoPrompt] = useState('');
   const [secondaryMarkUrls, setSecondaryMarkUrls] = useState<string[]>([]);
   const [abstractIconUrls, setAbstractIconUrls] = useState<string[]>([]);
+  const [profileImageUrlUrls, setProfileImageUrlUrls] = useState<string[]>([]);
   const [moodBoardUrls, setMoodBoardUrls] = useState<string[]>([]);
   const [socialMediaTopic, setSocialMediaTopic] = useState('');
   const [selectedSocialColor, setSelectedSocialColor] = useState<string>('');
@@ -283,6 +286,7 @@ export default function App() {
     setVerticalLogoUrl(null);
     setSecondaryMarkUrls([]);
     setAbstractIconUrls([]);
+    setProfileImageUrlUrls([]);
     setMoodBoardUrls([]);
     setSocialImageUrl(null);
     setSocialMediaTopic('');
@@ -309,6 +313,12 @@ export default function App() {
       if (strategy.abstractIcons) {
         const iconPromises = strategy.abstractIcons.map(icon => generateImage(icon.prompt, "512px", "1:1"));
         Promise.all(iconPromises).then(setAbstractIconUrls);
+      }
+
+      // Generate profile images in parallel
+      if (strategy.profileImagePrompts) {
+        const profilePromises = strategy.profileImagePrompts.map(prompt => generateImage(prompt, "512px", "1:1"));
+        Promise.all(profilePromises).then(setProfileImageUrlUrls);
       }
 
       // Generate mood board images
@@ -340,6 +350,7 @@ export default function App() {
     setVerticalLogoUrl(null);
     setSecondaryMarkUrls([]);
     setAbstractIconUrls([]);
+    setProfileImageUrlUrls([]);
     
     try {
       // Generate primary logo
@@ -360,6 +371,12 @@ export default function App() {
       if (brand.abstractIcons) {
         const iconPromises = brand.abstractIcons.map(icon => generateImage(icon.prompt, "512px", "1:1", negativePrompt));
         Promise.all(iconPromises).then(setAbstractIconUrls);
+      }
+
+      // Generate profile images in parallel
+      if (brand.profileImagePrompts) {
+        const profilePromises = brand.profileImagePrompts.map(prompt => generateImage(prompt, "512px", "1:1", negativePrompt));
+        Promise.all(profilePromises).then(setProfileImageUrlUrls);
       }
     } catch (err: any) {
       console.error(err);
@@ -1038,6 +1055,43 @@ export default function App() {
                         )}
                       </div>
                     </div>
+
+                    {/* Profile Image Suggestions */}
+                    <div className="glass-card p-6 space-y-6 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-neutral-400" />
+                          <span className="text-xs font-bold uppercase tracking-widest">Profile Image Suggestions</span>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-neutral-500 italic">Variations optimized for social media profile pictures (Twitter, Facebook, Instagram).</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        {profileImageUrlUrls.length > 0 ? (
+                          profileImageUrlUrls.map((url, idx) => (
+                            <div key={idx} className="flex flex-col gap-4">
+                              <div className="flex justify-center">
+                                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-black/5">
+                                  <img src={url} alt={`Profile Suggestion ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => handleDownload(url, `${brand.name.replace(/\s+/g, '_')}_Profile_${idx + 1}.png`)}
+                                className="w-full flex items-center justify-center gap-2 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Download Profile Image
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          [1, 2, 3].map((i) => (
+                            <div key={i} className="aspect-square bg-neutral-50 rounded-xl flex items-center justify-center border border-black/5">
+                              <Loader2 className="w-5 h-5 animate-spin text-neutral-200" />
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Color Palette */}
@@ -1437,6 +1491,85 @@ export default function App() {
                 </div>
               )}
 
+              {/* Business Card Mockup */}
+              {brand.businessCardDesign && (
+                <div className="glass-card p-8 space-y-8">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-neutral-400" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Business Card Mockup</span>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {/* Front */}
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Front Design</p>
+                      <div className="aspect-[1.75/1] bg-white rounded-xl border border-black/10 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center p-8">
+                        <div className="absolute inset-0 opacity-5" style={{ 
+                          backgroundImage: `radial-gradient(${brand.colors[0].hex} 1px, transparent 1px)`,
+                          backgroundSize: '20px 20px'
+                        }}></div>
+                        {logoUrl ? (
+                          <img src={logoUrl} alt="Logo" className="w-24 h-24 object-contain mb-4 z-10" />
+                        ) : (
+                          <div className="w-24 h-24 bg-black text-white flex items-center justify-center font-bold text-4xl rounded-lg mb-4 z-10">
+                            {brand.name.charAt(0)}
+                          </div>
+                        )}
+                        <h3 style={{ fontFamily: brand.typography.headerFont }} className="text-2xl font-bold tracking-tight z-10">{brand.name}</h3>
+                        <p style={{ fontFamily: brand.typography.bodyFont }} className="text-xs text-neutral-500 uppercase tracking-widest mt-1 z-10">{brand.tagline}</p>
+                      </div>
+                      <p className="text-xs text-neutral-500 leading-relaxed italic mt-4">{brand.businessCardDesign.front}</p>
+                    </div>
+
+                    {/* Back */}
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Back Design</p>
+                      <div className="aspect-[1.75/1] bg-neutral-900 rounded-xl border border-white/10 shadow-2xl relative overflow-hidden p-8 flex flex-col justify-between text-white">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h4 style={{ fontFamily: brand.typography.headerFont }} className="text-lg font-bold">Alex Sterling</h4>
+                            <p style={{ fontFamily: brand.typography.bodyFont }} className="text-[10px] text-white/60 uppercase tracking-widest">Founder & CEO</p>
+                          </div>
+                          {iconOnlyLogoUrl || logoUrl ? (
+                            <img src={iconOnlyLogoUrl || logoUrl || ''} alt="Icon" className="w-10 h-10 object-contain" referrerPolicy="no-referrer" />
+                          ) : (
+                            <div className="w-10 h-10 bg-white/10 rounded-lg" />
+                          )}
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <p style={{ fontFamily: brand.typography.bodyFont }} className="text-[10px] leading-relaxed text-white/80 max-w-[70%] italic">
+                            "{brand.mission}"
+                          </p>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[9px] font-mono text-white/60 pt-4 border-t border-white/10">
+                            <div className="flex items-center gap-2">
+                              <span className="w-1 h-1 rounded-full bg-white/40"></span>
+                              hello@sterling.com
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-1 h-1 rounded-full bg-white/40"></span>
+                              +1 (555) 000-1234
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-1 h-1 rounded-full bg-white/40"></span>
+                              www.{brand.name.toLowerCase().replace(/\s+/g, '')}.com
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-1 h-1 rounded-full bg-white/40"></span>
+                              @sterling_brand
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-neutral-500 leading-relaxed italic mt-4">{brand.businessCardDesign.back}</p>
+                    </div>
+                  </div>
+                  <div className="pt-6 border-t border-black/5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Design Rationale</p>
+                    <p className="text-sm text-neutral-600 leading-relaxed">{brand.businessCardDesign.layoutRationale}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Social Media Image Generator */}
               {brand && (
                 <div className="glass-card p-8 space-y-8">
@@ -1604,6 +1737,66 @@ export default function App() {
                               </div>
                             </div>
                           </div>
+                          
+                          {brand.brandGuidelines.logoUsage.digitalMockups && (
+                            <div className="space-y-3 pt-4 border-t border-black/5">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Digital Mockups</p>
+                              <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                  <p className="text-xs font-bold text-green-600">Acceptable Applications</p>
+                                  <ul className="space-y-2">
+                                    {brand.brandGuidelines.logoUsage.digitalMockups.acceptable.map((item, idx) => (
+                                      <li key={idx} className="text-sm text-neutral-600 flex items-start gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5 shrink-0" />
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div className="space-y-2">
+                                  <p className="text-xs font-bold text-red-500">Unacceptable Applications</p>
+                                  <ul className="space-y-2">
+                                    {brand.brandGuidelines.logoUsage.digitalMockups.unacceptable.map((item, idx) => (
+                                      <li key={idx} className="text-sm text-neutral-600 flex items-start gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {brand.brandGuidelines.logoUsage.printMockups && (
+                            <div className="space-y-3 pt-4 border-t border-black/5">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Print Mockups</p>
+                              <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                  <p className="text-xs font-bold text-green-600">Acceptable Applications</p>
+                                  <ul className="space-y-2">
+                                    {brand.brandGuidelines.logoUsage.printMockups.acceptable.map((item, idx) => (
+                                      <li key={idx} className="text-sm text-neutral-600 flex items-start gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5 shrink-0" />
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div className="space-y-2">
+                                  <p className="text-xs font-bold text-red-500">Unacceptable Applications</p>
+                                  <ul className="space-y-2">
+                                    {brand.brandGuidelines.logoUsage.printMockups.unacceptable.map((item, idx) => (
+                                      <li key={idx} className="text-sm text-neutral-600 flex items-start gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                                        <span>{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1713,6 +1906,41 @@ export default function App() {
                                 ))}
                               </ul>
                             </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {brand.brandGuidelines.logoVersionGuidelines && (
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Logo Version Guidelines</h4>
+                          <div className="space-y-6">
+                            {(['primary', 'monochromatic', 'reversed'] as const).map((version) => (
+                              <div key={version} className="space-y-3 bg-neutral-50 p-6 rounded-2xl border border-black/5">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 border-b border-black/5 pb-1 mb-2">{version} Version</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-green-600 flex items-center gap-1">
+                                      <ShieldCheck className="w-3 h-3" /> Acceptable Use
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-1 text-xs text-neutral-600">
+                                      {brand.brandGuidelines.logoVersionGuidelines[version].acceptable.map((item, idx) => (
+                                        <li key={idx}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 flex items-center gap-1">
+                                      <Info className="w-3 h-3" /> Unacceptable Use
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-1 text-xs text-neutral-600">
+                                      {brand.brandGuidelines.logoVersionGuidelines[version].unacceptable.map((item, idx) => (
+                                        <li key={idx}>{item}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
