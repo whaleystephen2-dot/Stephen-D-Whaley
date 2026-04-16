@@ -227,6 +227,7 @@ export default function App() {
   const [secondaryMarkUrls, setSecondaryMarkUrls] = useState<string[]>([]);
   const [abstractIconUrls, setAbstractIconUrls] = useState<string[]>([]);
   const [profileImageUrlUrls, setProfileImageUrlUrls] = useState<string[]>([]);
+  const [bannerImageUrls, setBannerImageUrls] = useState<string[]>([]);
   const [moodBoardUrls, setMoodBoardUrls] = useState<string[]>([]);
   const [socialMediaTopic, setSocialMediaTopic] = useState('');
   const [selectedSocialColor, setSelectedSocialColor] = useState<string>('');
@@ -287,6 +288,7 @@ export default function App() {
     setSecondaryMarkUrls([]);
     setAbstractIconUrls([]);
     setProfileImageUrlUrls([]);
+    setBannerImageUrls([]);
     setMoodBoardUrls([]);
     setSocialImageUrl(null);
     setSocialMediaTopic('');
@@ -321,6 +323,12 @@ export default function App() {
         Promise.all(profilePromises).then(setProfileImageUrlUrls);
       }
 
+      // Generate banner images in parallel
+      if (strategy.bannerImagePrompts) {
+        const bannerPromises = strategy.bannerImagePrompts.map(prompt => generateImage(prompt, "1K", "16:9"));
+        Promise.all(bannerPromises).then(setBannerImageUrls);
+      }
+
       // Generate mood board images
       if (strategy.moodBoard?.imagePrompts) {
         const moodBoardPromises = strategy.moodBoard.imagePrompts.map(prompt => generateImage(prompt, "1K", "1:1"));
@@ -351,6 +359,7 @@ export default function App() {
     setSecondaryMarkUrls([]);
     setAbstractIconUrls([]);
     setProfileImageUrlUrls([]);
+    setBannerImageUrls([]);
     
     try {
       // Generate primary logo
@@ -377,6 +386,12 @@ export default function App() {
       if (brand.profileImagePrompts) {
         const profilePromises = brand.profileImagePrompts.map(prompt => generateImage(prompt, "512px", "1:1", negativePrompt));
         Promise.all(profilePromises).then(setProfileImageUrlUrls);
+      }
+
+      // Generate banner images in parallel
+      if (brand.bannerImagePrompts) {
+        const bannerPromises = brand.bannerImagePrompts.map(prompt => generateImage(prompt, "1K", "16:9", negativePrompt));
+        Promise.all(bannerPromises).then(setBannerImageUrls);
       }
     } catch (err: any) {
       console.error(err);
@@ -1092,6 +1107,42 @@ export default function App() {
                         )}
                       </div>
                     </div>
+                    {/* Banner Image Suggestions */}
+                    {brand.bannerImagePrompts && (
+                      <div className="glass-card p-6 space-y-6 flex flex-col">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-neutral-400" />
+                            <span className="text-xs font-bold uppercase tracking-widest">Banner Image Suggestions</span>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-neutral-500 italic">Variations optimized for social media banners (Twitter, LinkedIn).</p>
+                        <div className="grid grid-cols-1 gap-6">
+                          {bannerImageUrls.length > 0 ? (
+                            bannerImageUrls.map((url, idx) => (
+                              <div key={idx} className="flex flex-col gap-4">
+                                <div className="w-full aspect-[3/1] rounded-xl overflow-hidden border border-black/5 shadow-md">
+                                  <img src={url} alt={`Banner Suggestion ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                </div>
+                                <button 
+                                  onClick={() => handleDownload(url, `${brand.name.replace(/\s+/g, '_')}_Banner_${idx + 1}.png`)}
+                                  className="w-full flex items-center justify-center gap-2 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download Banner Image
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            [1, 2].map((i) => (
+                              <div key={i} className="w-full aspect-[3/1] bg-neutral-50 rounded-xl flex items-center justify-center border border-black/5">
+                                <Loader2 className="w-5 h-5 animate-spin text-neutral-200" />
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Color Palette */}
@@ -1293,36 +1344,11 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Tagline Suggestions */}
-                  <div className="glass-card p-8 space-y-6">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-neutral-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Tagline Suggestions</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {brand.marketingCopy.taglines.map((tagline, idx) => (
-                        <div key={idx} className="p-4 bg-black/5 rounded-xl border border-black/5 group relative hover:bg-black/10 transition-colors">
-                          <p className="text-lg font-serif font-bold italic">"{tagline}"</p>
-                          <button 
-                            onClick={() => {
-                              navigator.clipboard.writeText(tagline);
-                              // Optional: add a toast or feedback
-                            }}
-                            className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
-                            title="Copy to clipboard"
-                          >
-                            <Download className="w-3.5 h-3.5 rotate-180" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Brand Voice */}
                   <div className="glass-card p-8 space-y-6">
                     <div className="flex items-center gap-2">
                       <Volume2 className="w-5 h-5 text-neutral-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Brand Voice</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">Brand Voice & Tone Guidelines</span>
                     </div>
                     <div className="space-y-6">
                       <div className="space-y-2">
@@ -1403,17 +1429,24 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Slogans */}
+                  {/* Marketing Taglines */}
                   <div className="glass-card p-8 space-y-6">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="w-5 h-5 text-neutral-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Slogan Options</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">Marketing Taglines</span>
                     </div>
                     <div className="space-y-6">
-                      {brand.slogans.map((s, idx) => (
+                      {brand.marketingTaglines.map((t, idx) => (
                         <div key={idx} className="space-y-2 pb-4 border-b border-black/5 last:border-0 last:pb-0">
-                          <p className="text-lg font-bold italic">"{s.slogan}"</p>
-                          <p className="text-xs text-neutral-500 leading-relaxed">{s.rationale}</p>
+                          <div className="flex items-center gap-3">
+                            <p className="text-lg font-bold italic">"{t.tagline}"</p>
+                            {t.style && (
+                              <span className="px-2 py-0.5 bg-neutral-100 border border-black/5 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                                {t.style}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-neutral-500 leading-relaxed">{t.rationale}</p>
                         </div>
                       ))}
                     </div>
@@ -1672,9 +1705,24 @@ export default function App() {
                     <BookOpen className="w-5 h-5 text-neutral-400" />
                     <span className="text-xs font-bold uppercase tracking-widest">Brand Guidelines</span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                      <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-8 relative items-start">
+                    {/* Sidebar Navigation */}
+                    <div className="w-full md:w-64 shrink-0 md:sticky md:top-8 space-y-1 bg-neutral-50/50 p-4 rounded-2xl border border-black/5">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-3 px-2">Contents</p>
+                      <a href="#logo-usage" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Logo Usage</a>
+                      <a href="#color-palette" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Color Palette Variations</a>
+                      <a href="#typography-hierarchy" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Typography Hierarchy</a>
+                      <a href="#brand-mark-applications" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Brand Mark Applications</a>
+                      {brand.brandGuidelines.socialMediaIconStyle && (
+                        <a href="#social-media-icon-style" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Social Media Icon Style</a>
+                      )}
+                      {brand.brandGuidelines.logoVersionGuidelines && (
+                        <a href="#logo-version-guidelines" className="block px-3 py-2 text-sm text-neutral-600 hover:bg-black/5 hover:text-black rounded-lg transition-colors font-medium">Logo Version Guidelines</a>
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-12 min-w-0">
+                      <div id="logo-usage" className="space-y-4 scroll-mt-8">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Logo Usage</h4>
                         <div className="space-y-4">
                           <div className="space-y-2">
@@ -1800,7 +1848,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="space-y-4">
+                      <div id="color-palette" className="space-y-4 scroll-mt-8">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Color Palette Variations</h4>
                         <div className="space-y-2">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Primary</p>
@@ -1827,10 +1875,8 @@ export default function App() {
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="space-y-6">
-                      <div className="space-y-4">
+                      <div id="typography-hierarchy" className="space-y-4 scroll-mt-8">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Typography Hierarchy</h4>
                         <div className="space-y-6 bg-neutral-50 p-6 rounded-2xl border border-black/5">
                           {(['h1', 'h2', 'h3', 'body', 'caption'] as const).map((level) => (
@@ -1853,7 +1899,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="space-y-4">
+                      <div id="brand-mark-applications" className="space-y-4 scroll-mt-8">
                         <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Brand Mark Applications</h4>
                         <div className="space-y-4">
                           <div className="space-y-2">
@@ -1880,7 +1926,7 @@ export default function App() {
                       </div>
 
                       {brand.brandGuidelines.socialMediaIconStyle && (
-                        <div className="space-y-4">
+                        <div id="social-media-icon-style" className="space-y-4 scroll-mt-8">
                           <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Social Media Icon Style</h4>
                           <div className="space-y-4 bg-neutral-50 p-6 rounded-2xl border border-black/5">
                             <div className="space-y-1">
@@ -1908,7 +1954,7 @@ export default function App() {
                       )}
 
                       {brand.brandGuidelines.logoVersionGuidelines && (
-                        <div className="space-y-4">
+                        <div id="logo-version-guidelines" className="space-y-4 scroll-mt-8">
                           <h4 className="text-sm font-bold uppercase tracking-widest text-neutral-800 border-b border-black/5 pb-2">Logo Version Guidelines</h4>
                           <div className="space-y-6">
                             {(['primary', 'monochromatic', 'reversed'] as const).map((version) => (

@@ -58,13 +58,15 @@ export interface BrandIdentity {
     description: string;
   }[];
   profileImagePrompts: string[];
+  bannerImagePrompts: string[];
   businessCardDesign: {
     front: string;
     back: string;
     layoutRationale: string;
   };
-  slogans: {
-    slogan: string;
+  marketingTaglines: {
+    tagline: string;
+    style: string;
     rationale: string;
   }[];
   marketingCopy: {
@@ -140,17 +142,18 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
     contents: `Create a comprehensive brand identity strategy based on this mission: "${mission}".
     ${desiredBrandVoice ? `The desired brand voice and tone is: "${desiredBrandVoice}". Please ensure all generated copy, messaging, and visual style recommendations reflect this voice.` : ''}
     Provide a brand name, tagline, 3 personality traits with a brief rationale for each, a 5-color palette (hex, name, usage), and Google Font pairings (header and body) with a detailed typography strategy explaining the choice.
-    Also provide a Brand Voice section including tone guidelines, messaging principles, an overall brand personality description derived from the mission, examples of language to use and language to avoid, 3-5 key characteristics of the brand's voice (with explanations and example sentences for each), and 3 specific examples of how the tone and messaging should be applied in different communication channels (e.g., Social Media, Website Copy, Customer Support). For each channel, explain how the voice is applied and provide a concrete copy example.
-    Also provide 5-10 slogan options, each with a brief rationale explaining how it aligns with the company mission.
-    Also generate marketing copy guidelines: suggest 3-5 descriptive words for the brand's voice (e.g., playful, authoritative), create 3-5 concise and memorable taglines, and write a short (50-75 word) brand description that embodies the brand identity. Ensure the generated copy reflects the brand's voice and tone, and aligns with the generated brand elements (colors, fonts, etc.).
-    Also provide 3-5 adaptable visual template concepts for social media posts (e.g., Instagram, Twitter). Describe how they incorporate the brand identity, and include placeholder text and image suggestions relevant to a general business context.
+    Also provide a Brand Voice & Tone Guidelines section. Based on the company mission, suggest 3-5 core voice characteristics (e.g., playful, authoritative, empathetic) and provide brief explanations and examples of how to apply them specifically in marketing copy, social media, and customer support. Include tone guidelines, messaging principles, an overall brand personality description, and examples of language to use and avoid.
+    Also provide 5-10 marketing tagline options, categorized by style (e.g., benefit-driven, descriptive, aspirational). Each tagline should be concise, memorable, and reflective of the brand's core values and offerings. Include a brief rationale explaining how it aligns with the company mission.
+    Also generate marketing copy guidelines: suggest 3-5 descriptive words for the brand's voice (e.g., playful, authoritative), and write a short (50-75 word) brand description that embodies the brand identity. Ensure the generated copy reflects the brand's voice and tone, and aligns with the generated brand elements (colors, fonts, etc.).
+    Also provide 3-5 adaptable visual template concepts for social media posts suitable for platforms like Instagram, Facebook, or LinkedIn. Ensure you provide examples for different types of posts (e.g., announcement, quote, promotion). Describe how they incorporate the generated logo variations, color palette, and font pairings, and include placeholder text and image suggestions relevant to a general business context.
     Also generate a mood board or visual theme based on the brand identity. Include a description of the visual theme, the imagery style, a list of suggested textures/patterns, and 4 detailed image prompts that could be used to generate mood board images.
     Also provide imagery style suggestions based on the mission and color palette. Suggest a style for brand photography (e.g., candid, professional, minimalist) and illustration (e.g., flat design, hand-drawn, abstract). Provide 2-3 example image descriptions or mood board concepts for each.
     Also outline detailed brand guidelines, including logo usage rules (clear space, minimum size, placement, and specific examples of acceptable and unacceptable mockups for digital and print applications, referencing the primary, monochromatic, and reversed logo versions), color palette variations (primary, secondary, accent), a detailed typography hierarchy (for h1, h2, h3, body, and caption, including usage context and styling rules like font size, weight, and case), acceptable/unacceptable brand mark applications, social media icon style (color usage, size constraints, acceptable variations, and guidance on usage), and a dedicated section for logo version guidelines (detailing acceptable and unacceptable uses for the primary, monochromatic, and reversed versions in digital and print contexts).
     Also provide highly detailed prompts for generating a primary logo, a monochromatic version, a reversed version, an icon-only version, a horizontal version, and a vertical version. The primary logo MUST be in a ${logoStyle} style.
     Furthermore, generate 3 variations of secondary marks or simplified logos specifically optimized for social media profile pictures (Twitter, Facebook, Instagram), ensuring they are legible at small sizes and fit common circular/square aspect ratios.
+    Also, generate 2-3 detailed prompts for social media banner images (e.g., Twitter header, LinkedIn background) that incorporate the brand's visual theme, colors, and typography.
     Also, design a professional business card mockup. Provide a detailed description for the front and back of the card, specifying the placement of the logo, company name, tagline, contact information placeholders (Name, Title, Email, Phone, Website), and the company mission statement. Explain the layout rationale.
-    Finally, suggest a set of 3-5 simple, abstract icons suitable for social media profile pictures or favicons. These icons should be inspired by the generated logo and color palette. Provide a detailed image generation prompt and a brief description for each icon.`,
+    Finally, generate a set of 3-5 simple, scalable social media icons that match the generated brand identity (logo style, color palette). These icons should be versatile enough for use on platforms like Instagram, Facebook, and Twitter. Provide a detailed image generation prompt and a brief description for each icon.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -228,16 +231,17 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
             },
             required: ["tone", "messaging", "personality", "rationale", "languageToUse", "languageToAvoid", "characteristics", "voiceExamples"]
           },
-          slogans: {
+          marketingTaglines: {
             type: Type.ARRAY,
-            description: "5-10 slogan options based on the company mission, with reasoning for each.",
+            description: "5-10 marketing tagline options categorized by style.",
             items: {
               type: Type.OBJECT,
               properties: {
-                slogan: { type: Type.STRING },
-                rationale: { type: Type.STRING }
+                tagline: { type: Type.STRING, description: "The marketing tagline." },
+                style: { type: Type.STRING, description: "The style category of the tagline (e.g., benefit-driven, descriptive, aspirational)." },
+                rationale: { type: Type.STRING, description: "Brief rationale explaining how it aligns with the company mission." }
               },
-              required: ["slogan", "rationale"]
+              required: ["tagline", "style", "rationale"]
             }
           },
           marketingCopy: {
@@ -288,6 +292,11 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
             type: Type.ARRAY,
             items: { type: Type.STRING },
             description: "3 detailed prompts for social media profile pictures, optimized for legibility at small sizes."
+          },
+          bannerImagePrompts: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "2-3 detailed prompts for social media banner images (e.g., Twitter header, LinkedIn background)."
           },
           businessCardDesign: {
             type: Type.OBJECT,
@@ -494,7 +503,7 @@ export const generateBrandStrategy = async (mission: string, logoStyle: string =
             required: ["logoUsage", "colorPaletteVariations", "typographyHierarchy", "brandMarkApplications", "socialMediaIconStyle", "logoVersionGuidelines"]
           }
         },
-        required: ["name", "mission", "tagline", "personality", "colors", "typography", "logoPrompt", "monochromaticLogoPrompt", "reversedLogoPrompt", "iconOnlyLogoPrompt", "secondaryMarkPrompts", "abstractIcons", "profileImagePrompts", "businessCardDesign", "socialMediaTemplates", "brandVoice", "slogans", "marketingCopy", "moodBoard", "brandGuidelines"]
+        required: ["name", "mission", "tagline", "personality", "colors", "typography", "logoPrompt", "monochromaticLogoPrompt", "reversedLogoPrompt", "iconOnlyLogoPrompt", "secondaryMarkPrompts", "abstractIcons", "profileImagePrompts", "bannerImagePrompts", "businessCardDesign", "socialMediaTemplates", "brandVoice", "marketingTaglines", "marketingCopy", "moodBoard", "brandGuidelines"]
       }
     }
   });
