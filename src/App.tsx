@@ -212,6 +212,7 @@ const renderTemplatePreview = (template: any, brand: BrandIdentity, logoUrl: str
 
 export default function App() {
   const [mission, setMission] = useState('');
+  const [targetAudience, setTargetAudience] = useState('');
   const [logoStyle, setLogoStyle] = useState<string>("Minimalist");
   const [desiredBrandVoice, setDesiredBrandVoice] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -294,7 +295,7 @@ export default function App() {
     setSocialMediaTopic('');
     
     try {
-      const strategy = await generateBrandStrategy(mission, logoStyle, desiredBrandVoice);
+      const strategy = await generateBrandStrategy(mission, targetAudience, logoStyle, desiredBrandVoice);
       setBrand(strategy);
       
       // Generate primary logo
@@ -555,7 +556,17 @@ export default function App() {
                     value={mission}
                     onChange={(e) => setMission(e.target.value)}
                     placeholder="e.g. We create sustainable, high-performance outdoor gear for urban explorers who value minimalist design and ethical manufacturing."
-                    className="w-full h-40 p-6 bg-white border border-black/10 rounded-2xl focus:ring-2 focus:ring-black/5 focus:border-black outline-none transition-all resize-none text-lg"
+                    className="w-full h-32 p-6 bg-white border border-black/10 rounded-2xl focus:ring-2 focus:ring-black/5 focus:border-black outline-none transition-all resize-none text-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Target Audience</label>
+                  <textarea 
+                    value={targetAudience}
+                    onChange={(e) => setTargetAudience(e.target.value)}
+                    placeholder="e.g. Urban millennials aged 25-35 who are environmentally conscious and active on weekends."
+                    className="w-full h-24 p-6 bg-white border border-black/10 rounded-2xl focus:ring-2 focus:ring-black/5 focus:border-black outline-none transition-all resize-none text-lg"
                   />
                 </div>
 
@@ -1356,9 +1367,26 @@ export default function App() {
                         <p className="text-sm font-medium leading-relaxed">{brand.brandVoice.tone}</p>
                       </div>
                       <div className="space-y-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Voice Rationale</p>
+                        <p className="text-sm text-neutral-600 leading-relaxed italic">{brand.brandVoice.rationale}</p>
+                      </div>
+                      <div className="space-y-2">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Messaging Principles</p>
                         <p className="text-sm text-neutral-600 leading-relaxed">{brand.brandVoice.messaging}</p>
                       </div>
+                      {brand.brandVoice.messagingPillars && brand.brandVoice.messagingPillars.length > 0 && (
+                        <div className="space-y-2 pt-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Key Messaging Pillars</p>
+                          <ul className="space-y-2">
+                            {brand.brandVoice.messagingPillars.map((pillar, idx) => (
+                              <li key={idx} className="text-sm text-neutral-600 flex items-start gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-neutral-300 mt-1.5 shrink-0" />
+                                <span>{pillar}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Mission-Driven Personality</p>
                         <p className="text-sm text-neutral-600 leading-relaxed italic">"{brand.brandVoice.personality}"</p>
@@ -1426,14 +1454,42 @@ export default function App() {
                           ))}
                         </div>
                       </div>
+
+                      {/* Brand Voice Profiles */}
+                      {brand.brandVoice.voiceProfiles && brand.brandVoice.voiceProfiles.length > 0 && (
+                        <div className="pt-6 border-t border-black/5 space-y-4">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Targeted Voice Profiles</p>
+                          <div className="grid grid-cols-1 gap-6">
+                            {brand.brandVoice.voiceProfiles.map((profile, idx) => (
+                              <div key={idx} className="space-y-4 p-6 bg-neutral-50 rounded-xl border border-black/5">
+                                <div>
+                                  <h4 className="text-sm font-bold text-neutral-900">{profile.profileName}</h4>
+                                  <p className="text-xs text-neutral-600 mt-1">{profile.toneDescription}</p>
+                                </div>
+                                <div className="space-y-3">
+                                  <div className="p-4 bg-white rounded-lg border border-black/5">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Marketing Copy Example</p>
+                                    <p className="text-xs text-neutral-800 italic">"{profile.marketingCopyExample}"</p>
+                                  </div>
+                                  <div className="p-4 bg-white rounded-lg border border-black/5">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Social Media Example</p>
+                                    <p className="text-xs text-neutral-800 italic">"{profile.socialMediaExample}"</p>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-neutral-500 italic mt-2">Rationale: {profile.rationale}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Marketing Taglines */}
+                  {/* Marketing Taglines & Slogans */}
                   <div className="glass-card p-8 space-y-6">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="w-5 h-5 text-neutral-400" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Marketing Taglines</span>
+                      <span className="text-xs font-bold uppercase tracking-widest">Marketing Taglines & Slogans</span>
                     </div>
                     <div className="space-y-6">
                       {brand.marketingTaglines.map((t, idx) => (
@@ -1599,6 +1655,87 @@ export default function App() {
                   <div className="pt-6 border-t border-black/5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Design Rationale</p>
                     <p className="text-sm text-neutral-600 leading-relaxed">{brand.businessCardDesign.layoutRationale}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Letterhead Mockup */}
+              {brand.letterheadDesign && (
+                <div className="glass-card p-8 space-y-8">
+                  <div className="flex items-center gap-2">
+                    <LayoutTemplate className="w-5 h-5 text-neutral-400" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Letterhead Mockup</span>
+                  </div>
+                  <div className="flex flex-col gap-8">
+                    <div className="bg-white border border-neutral-200 shadow-sm p-12 relative flex flex-col min-h-[600px]">
+                      {/* Header */}
+                      <div className="flex justify-between items-start border-b pb-8" style={{ borderColor: brand.colors[1]?.hex || '#ccc' }}>
+                        <div className="flex items-center gap-4">
+                          {logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+                          ) : (
+                            <div className="w-16 h-16 bg-neutral-100 flex items-center justify-center text-xs text-neutral-400">Logo</div>
+                          )}
+                          <div>
+                            <h3 style={{ fontFamily: brand.typography.headerFont, color: brand.colors[0]?.hex || '#000' }} className="text-2xl font-bold tracking-tight">{brand.name}</h3>
+                            <p style={{ fontFamily: brand.typography.bodyFont }} className="text-sm text-neutral-500 mt-1">{brand.tagline}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-xs space-y-1" style={{ color: brand.colors[0]?.hex || '#000' }}>
+                          <p>123 Brand Avenue</p>
+                          <p>Suite 400</p>
+                          <p>City, State ZIP</p>
+                        </div>
+                      </div>
+
+                      {/* Content Area */}
+                      <div className="flex-grow py-12 relative">
+                        <div className="absolute inset-0 opacity-[0.03] flex items-center justify-center select-none pointer-events-none">
+                          {logoUrl ? (
+                            <img src={logoUrl} alt="Watermark" className="w-64 h-64 object-contain grayscale" />
+                          ) : null}
+                        </div>
+                        <div className="space-y-4 max-w-2xl mx-auto opacity-30 pointer-events-none select-none">
+                          <div className="h-4 bg-neutral-200 rounded w-1/3"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-full"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-full"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-5/6"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-full"></div>
+                          <div className="h-4 bg-neutral-200 rounded w-4/5"></div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="border-t pt-6 text-xs text-center flex justify-between items-center" style={{ borderColor: brand.colors[1]?.hex || '#ccc', color: brand.colors[0]?.hex || '#000' }}>
+                        <p>{brand.mission}</p>
+                        <div className="flex gap-4 font-medium opacity-80">
+                          <span>(555) 123-4567</span>
+                          <span>|</span>
+                          <span>hello@{brand.name.toLowerCase().replace(/\s+/g, '')}.com</span>
+                          <span>|</span>
+                          <span>www.{brand.name.toLowerCase().replace(/\s+/g, '')}.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-black/5">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Header Design</p>
+                      <p className="text-xs text-neutral-600 leading-relaxed italic">{brand.letterheadDesign.header}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Footer Design</p>
+                      <p className="text-xs text-neutral-600 leading-relaxed italic">{brand.letterheadDesign.footer}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Watermark / Background</p>
+                    <p className="text-xs text-neutral-600 leading-relaxed italic">{brand.letterheadDesign.watermarkOrBackground}</p>
+                  </div>
+                  <div className="pt-6 border-t border-black/5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Design Rationale</p>
+                    <p className="text-sm text-neutral-600 leading-relaxed">{brand.letterheadDesign.layoutRationale}</p>
                   </div>
                 </div>
               )}
